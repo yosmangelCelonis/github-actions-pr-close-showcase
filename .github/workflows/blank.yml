@@ -1,0 +1,30 @@
+name: Seleccionar PR Mergeado
+
+on:
+  workflow_dispatch:
+
+jobs:
+  select_merged_pr:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Obtener lista de PR mergeados
+      id: get_merged_prs
+      run: |
+        MERGED_PRS=$(curl -sSL -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/${{ github.repository }}/pulls?state=closed&sort=updated&direction=desc")
+        echo "::set-output name=merged_prs::$MERGED_PRS"
+
+    - name: Procesar lista de PR mergeados
+      id: process_merged_prs
+      run: |
+        MERGED_PRS=${{ steps.get_merged_prs.outputs.merged_prs }}
+        echo "Seleccione un pull request para procesar:"
+        echo "$MERGED_PRS"
+        # Aquí podrías procesar la lista de PRs para presentarla al usuario en un formato más legible
+
+    - name: Procesar PR seleccionado
+      if: github.event.inputs.selected_pr_number != ''
+      run: |
+        SELECTED_PR_NUMBER=${{ github.event.inputs.selected_pr_number }}
+        echo "Procesando pull request mergeado número $SELECTED_PR_NUMBER"
+        # Aquí puedes utilizar el número del pull request seleccionado para realizar tareas adicionales
